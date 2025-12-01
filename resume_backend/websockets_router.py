@@ -45,6 +45,8 @@ async def get_ai_response(user_message, conversation_history):
     headers = {
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json",
+        "HTTP-Referer": "https://github.com/pauljflanagan/resume-chatbot-ui",
+        "X-Title": "Resume Chatbot UI"
     }
 
     # Build the messages array with system message and conversation history
@@ -55,17 +57,21 @@ async def get_ai_response(user_message, conversation_history):
     data = {"model": "openai/gpt-4", "messages": messages, "max_tokens": 1500}
 
     try:
+        print(f"Making request to OpenRouter with API key: {API_KEY[:10]}...")
         response = requests.post(OPENROUTER_URL, headers=headers, json=data)
+        print(f"OpenRouter response status: {response.status_code}")
+        print(f"OpenRouter response headers: {response.headers}")
+        
         if response.status_code == 200:
             result = response.json()
             return result["choices"][0]["message"]["content"]
         else:
             error_msg = f"API Error {response.status_code}: {response.text}"
             print(error_msg)
-            return f"I apologize, but I'm experiencing technical difficulties. Please try again later. ({response.status_code})"
+            return f"I apologize, but I'm experiencing technical difficulties. Error: {response.status_code} - {response.text[:100]}"
     except Exception as e:
         print(f"Error calling OpenRouter API: {e}")
-        return "I apologize, but I'm experiencing technical difficulties. Please try again later."
+        return f"I apologize, but I'm experiencing technical difficulties. Exception: {str(e)}"
 
 
 async def handle_chat_message(websocket, message, client_id):

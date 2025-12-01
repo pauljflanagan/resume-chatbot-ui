@@ -5,15 +5,26 @@ import asyncio
 from websockets.server import serve
 from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
 from pypdf import PdfReader
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv(dotenv_path="../.env")
 
 # Get configuration from environment variables
 API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 PORT = int(os.getenv("PORT", 8765))
 
+# Validate API key
+if not API_KEY:
+    print("ERROR: OPENROUTER_API_KEY environment variable is not set!")
+    print("Please set your OpenRouter API key in the .env file")
+    exit(1)
+
 headers = {
     "Authorization": f"Bearer {API_KEY}",
     "Content-Type": "application/json",
+    "X-Title": "Resume Chatbot"  # Optional: for analytics
 }
 
 def read_json_format(json_path):
@@ -62,12 +73,13 @@ Responses should be concise, conversational, and professional. Although you have
         messages.append({"role": "user", "content": user_message})
         
         data = {
-            "model": "meta-llama/llama-3.1-8b-instruct:free",  # Using free model
+            "model": "openai/gpt-4",
             "messages": messages,
             "max_tokens": 1000,
             "temperature": 0.7
         }
         
+        print(f"Sending request to OpenRouter with model: {data['model']}")
         response = requests.post(OPENROUTER_URL, headers=headers, json=data, timeout=30)
         
         if response.status_code == 200:
@@ -75,8 +87,20 @@ Responses should be concise, conversational, and professional. Although you have
             ai_response = result["choices"][0]["message"]["content"]
             return ai_response
         else:
-            print(f"OpenRouter API error: {response.status_code} - {response.text}")
-            return "I'm sorry, I'm having trouble accessing my information right now. Please try again in a moment."
+            error_detail = ""
+            try:
+                error_json = response.json()
+                error_detail = error_json.get("error", {}).get("message", response.text)
+            except:
+                error_detail = response.text
+            
+            print(f"OpenRouter API error: {response.status_code}")
+            print(f"Error details: {error_detail}")
+            print(f"Headers sent: {headers}")
+            print(f"API Key present: {'Yes' if API_KEY else 'No'}")
+            print(f"API Key format: {API_KEY[:20]}..." if API_KEY and len(API_KEY) > 20 else f"API Key: {API_KEY}")
+            
+            return f"I'm sorry, I'm having trouble accessing my information right now. API Error: {response.status_code}. Please check the server logs."
             
     except requests.exceptions.Timeout:
         return "I'm sorry, my response is taking longer than expected. Please try asking again."
