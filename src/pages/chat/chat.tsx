@@ -7,12 +7,18 @@ import { Overview } from "@/components/custom/overview";
 import { Header } from "@/components/custom/header";
 import {v4 as uuidv4} from 'uuid';
 
-//const socket = new WebSocket("ws://localhost:8090"); //change to your websocket endpoint
+// WebSocket configuration for production and development
+const getWebSocketUrl = () => {
+  if (process.env.NODE_ENV === 'production') {
+    // Replace 'your-railway-app' with your actual Railway app URL when deployed
+    return 'wss://your-railway-app.railway.app';
+  } else {
+    // Development - use localhost
+    return 'ws://localhost:8765';
+  }
+};
 
-// get the device (instance)'s websocket endpoint
-const proto = window.location.protocol === "https:" ? "wss" : "ws";
-const host = window.location.hostname;
-const socket = new WebSocket(`${proto}://${host}:8090`);
+const socket = new WebSocket(getWebSocketUrl());
 
 export function Chat() {
   const [messagesContainerRef, messagesEndRef] = useScrollToBottom<HTMLDivElement>();

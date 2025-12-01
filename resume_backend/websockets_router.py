@@ -8,7 +8,7 @@ import requests
 from pypdf import PdfReader
 
 # OpenRouter API configuration
-API_KEY = "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"
+API_KEY = os.get("OPENROUTER_API_KEY")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 

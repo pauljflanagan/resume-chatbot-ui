@@ -1,9 +1,10 @@
 import requests
 import json
 from pypdf import PdfReader
+import os
 
 # Replace with your actual API key from https://openrouter.ai
-API_KEY = "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"
+API_KEY = os.get("OPENROUTER_API_KEY")
 
 # Endpoint for OpenRouter completions
 url = "https://openrouter.ai/api/v1/chat/completions"
