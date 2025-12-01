@@ -103,12 +103,19 @@ python main.py
 ## Troubleshooting
 
 ### Common Issues
-1. **WebSocket connection failed:** Check that backend is deployed and URL is correct
-2. **Build fails:** Ensure all dependencies are installed with `npm ci`
-3. **CORS issues:** Backend automatically handles CORS for WebSocket connections
-4. **OpenRouter API errors:** Check API key and quota
+1. **Blank screen on GitHub Pages:** 
+   - Check that `docs/` folder exists with `index.html`
+   - Verify GitHub Pages is set to deploy from `main` branch, `/docs` folder
+   - Router basename should match your repository name in `App.tsx`
+   - Wait 5-10 minutes after pushing for GitHub Pages to update
+2. **WebSocket connection failed:** Check that backend is deployed and URL is correct
+3. **Build fails:** Ensure all dependencies are installed with `npm ci`
+4. **CORS issues:** Backend automatically handles CORS for WebSocket connections
+5. **OpenRouter API errors:** Check API key and quota
 
 ### Debugging
-- Check browser console for frontend errors
+- Check browser console for frontend errors (F12 → Console tab)
+- Check Network tab for 404 errors on CSS/JS files
 - Check Railway logs for backend errors
 - Verify environment variables are set correctly
+- GitHub Pages can take 5-10 minutes to update after pushing changes
