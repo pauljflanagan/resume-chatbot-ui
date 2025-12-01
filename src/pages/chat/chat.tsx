@@ -38,30 +38,52 @@ async function handleSubmit(text?: string) {
   
   const traceId = uuidv4();
   setMessages(prev => [...prev, { content: messageText, role: "user", id: traceId }]);
-  socket.send(messageText);
+  // Send message as JSON to the WebSocket server
+  socket.send(JSON.stringify({ message: messageText }));
   setQuestion("");
 
   try {
     const messageHandler = (event: MessageEvent) => {
-      setIsLoading(false);
       if(event.data.includes("[END]")) {
+        setIsLoading(false);
+        cleanupMessageHandler();
         return;
       }
       
-      setMessages(prev => {
-        const lastMessage = prev[prev.length - 1];
-        const newContent = lastMessage?.role === "assistant" 
-          ? lastMessage.content + event.data 
-          : event.data;
+      try {
+        // Try to parse as JSON first
+        const responseData = JSON.parse(event.data);
         
-        const newMessage = { content: newContent, role: "assistant", id: traceId };
-        return lastMessage?.role === "assistant"
-          ? [...prev.slice(0, -1), newMessage]
-          : [...prev, newMessage];
-      });
-
-      if (event.data.includes("[END]")) {
-        cleanupMessageHandler();
+        if (responseData.type === "chat_response") {
+          // Handle structured chat response
+          const newMessage = { 
+            content: responseData.message, 
+            role: "assistant", 
+            id: traceId 
+          };
+          setMessages(prev => [...prev, newMessage]);
+        } else if (responseData.type === "error") {
+          // Handle error response
+          const errorMessage = { 
+            content: responseData.message || "An error occurred", 
+            role: "assistant", 
+            id: traceId 
+          };
+          setMessages(prev => [...prev, errorMessage]);
+        }
+      } catch (jsonError) {
+        // Fallback to plain text handling for backwards compatibility
+        setMessages(prev => {
+          const lastMessage = prev[prev.length - 1];
+          const newContent = lastMessage?.role === "assistant" 
+            ? lastMessage.content + event.data 
+            : event.data;
+          
+          const newMessage = { content: newContent, role: "assistant", id: traceId };
+          return lastMessage?.role === "assistant"
+            ? [...prev.slice(0, -1), newMessage]
+            : [...prev, newMessage];
+        });
       }
     };
 

@@ -20,8 +20,8 @@ export const Overview = () => {
         </p>
         <p>
           Welcome to <strong>chatbot-ui</strong><br />
-          a open source template made by<br />
-          <strong>Leon Binder</strong> and <strong>Christoph Handschuh</strong>.
+          a resume-based chatbot based off the<br />
+          professional experience of <strong>Paul Flanagan</strong>.
         </p>
       </div>
     </motion.div>

@@ -15,14 +15,24 @@ interface ChatInputProps {
 
 const suggestedActions = [
     {
-        title: 'How is the weather',
-        label: 'in Vienna?',
-        action: 'How is the weather in Vienna today?',
+        title: 'Tell me about your',
+        label: 'technical skills',
+        action: 'What are your main technical skills and programming languages?',
     },
     {
-        title: 'Tell me a fun fact',
-        label: 'about pandas',
-        action: 'Tell me an interesting fact about pandas',
+        title: 'Describe your experience',
+        label: 'at Wellington Management',
+        action: 'Can you tell me about your experience at Wellington Management?',
+    },
+    {
+        title: 'What projects have you',
+        label: 'worked on recently?',
+        action: 'What kind of projects have you worked on in your current role?',
+    },
+    {
+        title: 'Tell me about your',
+        label: 'education background',
+        action: 'What is your educational background?',
     },
 ];
 
@@ -40,7 +50,7 @@ export const ChatInput = ({ question, setQuestion, onSubmit, isLoading }: ChatIn
                     exit={{ opacity: 0, y: 20 }}
                     transition={{ delay: 0.05 * index }}
                     key={index}
-                    className={index > 1 ? 'hidden sm:block' : 'block'}
+                    className="block"
                     >
                         <Button
                             variant="ghost"

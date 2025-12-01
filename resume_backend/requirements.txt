@@ -1,0 +1,4 @@
+pypdf
+websockets
+requests
+asyncio

@@ -1,0 +1,113 @@
+{
+  "PERSONAL_INFO_TEMPLATE": {
+    "Name": "Paul Flanagan",
+    "Title": "Full Stack Engineer",
+    "Location": "Belmont, MA",
+    "Email": "PaulFlanagan@protonmail.com",
+    "Phone": "(781) 707-6712",
+    "LinkedIn": "https://www.linkedin.com/in/paul-flanagan1/",
+    "GitHub": "https://github.com/pauljflanagan"
+  },
+  "_SKILLS_TEMPLATE": {
+    "Web & Programming": [
+      "Python",
+      "Django",
+      "JavaScript",
+      "Java",
+      "TypeScript",
+      "NodeJS",
+      "ElasticSearch",
+      "SQL",
+      "HTML",
+      "CSS",
+      "REST API",
+      "MATLAB",
+      "R",
+      "Swift"
+    ],
+    "Framework & Tools": [
+      "Express",
+      "React",
+      "Redux",
+      "Atlassian",
+      "ServiceNow",
+      "Confluence",
+      "Webstorm",
+      "Agile (Jira)",
+      "CLI (bash, zsh, Powershell, Windows)",
+      "Jupyter",
+      "Pytorch",
+      "TensorFlow",
+      "AI prompt generation/manipulation"
+    ],
+    "Infrastructure": [
+      "Git",
+      "Gitlab template for CI/CD",
+      "Docker",
+      "Jenkins",
+      "Kubernetes",
+      "AWS (Lambda, EC2, CloudFormation, CloudWatch, S3, RDS MySQL)",
+      "Azure (Cosmos DB, Azure Containers, Storage, AI Foundry)"
+    ]
+  },
+  "_EXPERIENCE_TEMPLATE": [
+    {
+      "Title": "Full Stack Engineer",
+      "Company": "VoteMate",
+      "Location": "",
+      "Start Date": "Aug 2025",
+      "End Date": "Present",
+      "Responsibilities": [
+        "Contribute to front-end, integration and back-end features, working across UX/UI, AI, and product teams to deliver features",
+        "Build and maintain scalable APIs and backend services Python/FastAPI, Node.js",
+        "Integrate with cloud-native tools (Azure, among other Microsoft products) and CI/CD pipelines",
+        "Work within sprint goals and GitHub tickets, participating in code reviews, planning sessions, and architecture discussions",
+        "Support and supervise the contribution efforts of Carnegie Mellon interns"
+      ]
+    },
+    {
+      "Title": "Software Engineer",
+      "Company": "Wellington Management",
+      "Location": "Boston, MA",
+      "Start Date": "July 2022",
+      "End Date": "May 2025",
+      "Responsibilities": [
+        "Designed and delivered data-driven solutions to enhance the quality and efficiency of investment decisions for investment directors",
+        "Leveraged a suite of Amazon AWS products (CloudFormation, S3, EC2, Lambda) to host, modify, and monitor batched data processing, deploying through Jenkins",
+        "Enhanced current processes by breaking down complex jobs into reusable components for broader team utilization",
+        "Formulated a new full stack workflow for a preexisting project through collaboration with portfolio analysts and software architects",
+        "Developed, executed universal certificate renewal process for AWS ACM in partnership with technical engineers",
+        "Maintained, updated, and improved data collection and analysis systems through effective communication with internal and external development teams"
+      ]
+    },
+    {
+      "Title": "Data Developer",
+      "Company": "Hemedex",
+      "Location": "Waltham, MA",
+      "Start Date": "February 2022",
+      "End Date": "July 2022",
+      "Responsibilities": [
+        "Generate time-synchronized tables, relative to time of injury, based on differentiated patient data",
+        "Analyze data, create new parameters for analysis based on tables using Excel, MATLAB, PowerPoint",
+        "Present findings to medically trained audience to inform training, usage of medical devices in ICU",
+        "Coordinate tasks with peers with varying levels of technicality in neurobiology, technology"
+      ]
+    }
+  ],
+  "_EDUCATION_TEMPLATE": [
+    {
+      "University": "Northeastern University",
+      "Location": "Boston, MA",
+      "Degree": "Master of Science",
+      "Field of Study": "Computer Science",
+      "GPA": "3.58"
+    },
+    {
+      "University": "Bentley University",
+      "Location": "Waltham, MA",
+      "Degree": "Bachelor of Science",
+      "Field of Study": "Computer Information Systems",
+      "GPA": "3.64"
+    }
+  ]
+}
