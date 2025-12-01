@@ -9,12 +9,17 @@ import {v4 as uuidv4} from 'uuid';
 
 // WebSocket configuration for production and development
 const getWebSocketUrl = () => {
-  if (process.env.NODE_ENV === 'production') {
-    // Replace 'your-railway-app' with your actual Railway app URL when deployed
-    return 'wss://your-railway-app.railway.app';
+  if (import.meta.env.PROD) {
+    // Use production WebSocket URL from environment variable
+    const prodWsUrl = import.meta.env.VITE_PRODUCTION_WEBSOCKET_URL;
+    if (prodWsUrl) {
+      return prodWsUrl;
+    }
+    console.warn('Production WebSocket URL not configured. Please set VITE_PRODUCTION_WEBSOCKET_URL environment variable.');
+    return 'wss://resume-chatbot-ui-production.up.railway.app'; // fallback from .env.example
   } else {
-    // Development - use localhost
-    return 'ws://localhost:8765';
+    // Development - use localhost or environment override
+    return import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost:8765';
   }
 };
 
