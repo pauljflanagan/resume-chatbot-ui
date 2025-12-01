@@ -6,7 +6,7 @@ import { ThemeProvider } from './context/ThemeContext'
 function App() {
   return (
     <ThemeProvider>
-      <Router>
+      <Router basename="/resume-chatbot-ui">
         <div className="w-full h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
           <Routes>
             <Route path="/" element={<Chat />} />

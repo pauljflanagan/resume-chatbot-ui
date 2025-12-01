@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:gh-pages": "tsc -b && vite build --base=/resume-chatbot-ui/",
+    "build:gh-pages": "tsc -b && vite build",
     "serve": "serve dist -p 8501",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

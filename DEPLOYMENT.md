@@ -40,6 +40,7 @@ Your frontend will be available at: `https://yourusername.github.io/resume-chatb
 1. **Create new Railway project:**
    - Connect your GitHub repository
    - Set root directory to `resume_backend`
+   - Railway will detect it as a Python project due to requirements.txt and Dockerfile
 
 2. **Configure environment variables:**
    - `OPENROUTER_API_KEY`: Your OpenRouter API key
@@ -47,6 +48,7 @@ Your frontend will be available at: `https://yourusername.github.io/resume-chatb
 
 3. **Deploy:**
    - Railway will automatically deploy when you push to main branch
+   - Uses the Dockerfile in resume_backend/ for containerized deployment
    - Note your Railway URL (e.g., `https://your-app.railway.app`)
 
 4. **Update frontend WebSocket URL:**
