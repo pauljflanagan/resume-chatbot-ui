@@ -1,7 +1,7 @@
 import { ChatInput } from "@/components/custom/chatinput";
 import { PreviewMessage, ThinkingMessage } from "../../components/custom/message";
 import { useScrollToBottom } from '@/components/custom/use-scroll-to-bottom';
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { message } from "../../interfaces/interfaces"
 import { Overview } from "@/components/custom/overview";
 import { Header } from "@/components/custom/header";
@@ -18,25 +18,62 @@ const getWebSocketUrl = () => {
   }
 };
 
-const socket = new WebSocket(getWebSocketUrl());
-
 export function Chat() {
   const [messagesContainerRef, messagesEndRef] = useScrollToBottom<HTMLDivElement>();
   const [messages, setMessages] = useState<message[]>([]);
   const [question, setQuestion] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [connectionError, setConnectionError] = useState<string>("");
 
+  const socketRef = useRef<WebSocket | null>(null);
   const messageHandlerRef = useRef<((event: MessageEvent) => void) | null>(null);
 
+  // Initialize WebSocket connection
+  useEffect(() => {
+    const initializeWebSocket = () => {
+      try {
+        const wsUrl = getWebSocketUrl();
+        socketRef.current = new WebSocket(wsUrl);
+        
+        socketRef.current.onopen = () => {
+          console.log('WebSocket connected');
+          setConnectionError("");
+        };
+        
+        socketRef.current.onerror = (error) => {
+          console.error('WebSocket error:', error);
+          setConnectionError("Failed to connect to the chat server. Please make sure the backend is running.");
+        };
+        
+        socketRef.current.onclose = () => {
+          console.log('WebSocket disconnected');
+          setConnectionError("Connection to chat server lost. Please refresh the page.");
+        };
+      } catch (error) {
+        console.error('Failed to initialize WebSocket:', error);
+        setConnectionError("Failed to initialize chat connection.");
+      }
+    };
+
+    initializeWebSocket();
+
+    // Cleanup on unmount
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.close();
+      }
+    };
+  }, []);
+
   const cleanupMessageHandler = () => {
-    if (messageHandlerRef.current && socket) {
-      socket.removeEventListener("message", messageHandlerRef.current);
+    if (messageHandlerRef.current && socketRef.current) {
+      socketRef.current.removeEventListener("message", messageHandlerRef.current);
       messageHandlerRef.current = null;
     }
   };
 
 async function handleSubmit(text?: string) {
-  if (!socket || socket.readyState !== WebSocket.OPEN || isLoading) return;
+  if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN || isLoading) return;
 
   const messageText = text || question;
   setIsLoading(true);
@@ -45,7 +82,7 @@ async function handleSubmit(text?: string) {
   const traceId = uuidv4();
   setMessages(prev => [...prev, { content: messageText, role: "user", id: traceId }]);
   // Send message as JSON to the WebSocket server
-  socket.send(JSON.stringify({ message: messageText }));
+  socketRef.current.send(JSON.stringify({ message: messageText }));
   setQuestion("");
 
   try {
@@ -94,7 +131,7 @@ async function handleSubmit(text?: string) {
     };
 
     messageHandlerRef.current = messageHandler;
-    socket.addEventListener("message", messageHandler);
+    socketRef.current.addEventListener("message", messageHandler);
   } catch (error) {
     console.error("WebSocket error:", error);
     setIsLoading(false);
@@ -104,6 +141,14 @@ async function handleSubmit(text?: string) {
   return (
     <div className="flex flex-col min-w-0 h-dvh bg-background">
       <Header/>
+      {connectionError && (
+        <div className="mx-auto px-4 py-2 bg-red-100 border border-red-400 text-red-700 rounded-md max-w-3xl">
+          <p className="text-sm">{connectionError}</p>
+          <p className="text-xs mt-1">
+            For local development, make sure to start the backend server: <code>cd resume_backend && python main.py</code>
+          </p>
+        </div>
+      )}
       <div className="flex flex-col min-w-0 gap-6 flex-1 overflow-y-scroll pt-4" ref={messagesContainerRef}>
         {messages.length == 0 && <Overview />}
         {messages.map((message, index) => (
