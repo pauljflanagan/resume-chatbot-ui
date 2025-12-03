@@ -1,11 +1,14 @@
-import { ChatInput } from "@/components/custom/chatinput";
-import { PreviewMessage, ThinkingMessage } from "../../components/custom/message";
+import { ChatInput } from '@/components/custom/chatinput';
+import {
+  PreviewMessage,
+  ThinkingMessage,
+} from '../../components/custom/message';
 import { useScrollToBottom } from '@/components/custom/use-scroll-to-bottom';
-import { useState, useRef, useEffect } from "react";
-import { message } from "../../interfaces/interfaces"
-import { Overview } from "@/components/custom/overview";
-import { Header } from "@/components/custom/header";
-import {v4 as uuidv4} from 'uuid';
+import { useState, useRef, useEffect } from 'react';
+import { message } from '../../interfaces/interfaces';
+import { Overview } from '@/components/custom/overview';
+import { Header } from '@/components/custom/header';
+import { v4 as uuidv4 } from 'uuid';
 
 // WebSocket configuration for production and development
 const getWebSocketUrl = () => {
@@ -15,7 +18,9 @@ const getWebSocketUrl = () => {
     if (prodWsUrl) {
       return prodWsUrl;
     }
-    console.warn('Production WebSocket URL not configured. Please set VITE_PRODUCTION_WEBSOCKET_URL environment variable.');
+    console.warn(
+      'Production WebSocket URL not configured. Please set VITE_PRODUCTION_WEBSOCKET_URL environment variable.'
+    );
     return 'wss://resume-chatbot-ui-production.up.railway.app'; // fallback from .env.example
   } else {
     // Development - use localhost or environment override
@@ -24,14 +29,17 @@ const getWebSocketUrl = () => {
 };
 
 export function Chat() {
-  const [messagesContainerRef, messagesEndRef] = useScrollToBottom<HTMLDivElement>();
+  const [messagesContainerRef, messagesEndRef] =
+    useScrollToBottom<HTMLDivElement>();
   const [messages, setMessages] = useState<message[]>([]);
-  const [question, setQuestion] = useState<string>("");
+  const [question, setQuestion] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [connectionError, setConnectionError] = useState<string>("");
+  const [connectionError, setConnectionError] = useState<string>('');
 
   const socketRef = useRef<WebSocket | null>(null);
-  const messageHandlerRef = useRef<((event: MessageEvent) => void) | null>(null);
+  const messageHandlerRef = useRef<((event: MessageEvent) => void) | null>(
+    null
+  );
 
   // Initialize WebSocket connection
   useEffect(() => {
@@ -39,24 +47,28 @@ export function Chat() {
       try {
         const wsUrl = getWebSocketUrl();
         socketRef.current = new WebSocket(wsUrl);
-        
+
         socketRef.current.onopen = () => {
           console.log('WebSocket connected');
-          setConnectionError("");
+          setConnectionError('');
         };
-        
+
         socketRef.current.onerror = (error) => {
           console.error('WebSocket error:', error);
-          setConnectionError("Failed to connect to the chat server. Please make sure the backend is running.");
+          setConnectionError(
+            'Failed to connect to the chat server. Please make sure the backend is running.'
+          );
         };
-        
+
         socketRef.current.onclose = () => {
           console.log('WebSocket disconnected');
-          setConnectionError("Connection to chat server lost. Please refresh the page.");
+          setConnectionError(
+            'Connection to chat server lost. Please refresh the page.'
+          );
         };
       } catch (error) {
         console.error('Failed to initialize WebSocket:', error);
-        setConnectionError("Failed to initialize chat connection.");
+        setConnectionError('Failed to initialize chat connection.');
       }
     };
 
@@ -72,98 +84,124 @@ export function Chat() {
 
   const cleanupMessageHandler = () => {
     if (messageHandlerRef.current && socketRef.current) {
-      socketRef.current.removeEventListener("message", messageHandlerRef.current);
+      socketRef.current.removeEventListener(
+        'message',
+        messageHandlerRef.current
+      );
       messageHandlerRef.current = null;
     }
   };
 
-async function handleSubmit(text?: string) {
-  if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN || isLoading) return;
+  async function handleSubmit(text?: string, llm_model?: string) {
+    if (
+      !socketRef.current ||
+      socketRef.current.readyState !== WebSocket.OPEN ||
+      isLoading
+    )
+      return;
 
-  const messageText = text || question;
-  setIsLoading(true);
-  cleanupMessageHandler();
-  
-  const traceId = uuidv4();
-  setMessages(prev => [...prev, { content: messageText, role: "user", id: traceId }]);
-  // Send message as JSON to the WebSocket server
-  socketRef.current.send(JSON.stringify({ message: messageText }));
-  setQuestion("");
+    const messageText = text || question;
+    setIsLoading(true);
+    cleanupMessageHandler();
 
-  try {
-    const messageHandler = (event: MessageEvent) => {
-      if(event.data.includes("[END]")) {
-        setIsLoading(false);
-        cleanupMessageHandler();
-        return;
-      }
-      
-      try {
-        // Try to parse as JSON first
-        const responseData = JSON.parse(event.data);
-        
-        if (responseData.type === "chat_response") {
-          // Handle structured chat response
-          const newMessage = { 
-            content: responseData.message, 
-            role: "assistant", 
-            id: traceId 
-          };
-          setMessages(prev => [...prev, newMessage]);
-        } else if (responseData.type === "error") {
-          // Handle error response
-          const errorMessage = { 
-            content: responseData.message || "An error occurred", 
-            role: "assistant", 
-            id: traceId 
-          };
-          setMessages(prev => [...prev, errorMessage]);
+    const traceId = uuidv4();
+    setMessages((prev) => [
+      ...prev,
+      { content: messageText, role: 'user', id: traceId },
+    ]);
+    // Send message as JSON to the WebSocket server with model selection
+    socketRef.current.send(JSON.stringify({ 
+      message: messageText,
+      model: llm_model || 'GPT-4'  // Default to GPT-4 if no model specified
+    }));
+    setQuestion('');
+
+    try {
+      const messageHandler = (event: MessageEvent) => {
+        if (event.data.includes('[END]')) {
+          setIsLoading(false);
+          cleanupMessageHandler();
+          return;
         }
-      } catch (jsonError) {
-        // Fallback to plain text handling for backwards compatibility
-        setMessages(prev => {
-          const lastMessage = prev[prev.length - 1];
-          const newContent = lastMessage?.role === "assistant" 
-            ? lastMessage.content + event.data 
-            : event.data;
-          
-          const newMessage = { content: newContent, role: "assistant", id: traceId };
-          return lastMessage?.role === "assistant"
-            ? [...prev.slice(0, -1), newMessage]
-            : [...prev, newMessage];
-        });
-      }
-    };
 
-    messageHandlerRef.current = messageHandler;
-    socketRef.current.addEventListener("message", messageHandler);
-  } catch (error) {
-    console.error("WebSocket error:", error);
-    setIsLoading(false);
+        try {
+          // Try to parse as JSON first
+          const responseData = JSON.parse(event.data);
+
+          if (responseData.type === 'chat_response') {
+            // Handle structured chat response
+            const newMessage = {
+              content: responseData.message,
+              role: 'assistant',
+              id: traceId,
+            };
+            setMessages((prev) => [...prev, newMessage]);
+          } else if (responseData.type === 'error') {
+            // Handle error response
+            const errorMessage = {
+              content: responseData.message || 'An error occurred',
+              role: 'assistant',
+              id: traceId,
+            };
+            setMessages((prev) => [...prev, errorMessage]);
+          }
+        } catch (jsonError) {
+          // Fallback to plain text handling for backwards compatibility
+          setMessages((prev) => {
+            const lastMessage = prev[prev.length - 1];
+            const newContent =
+              lastMessage?.role === 'assistant'
+                ? lastMessage.content + event.data
+                : event.data;
+
+            const newMessage = {
+              content: newContent,
+              role: 'assistant',
+              id: traceId,
+            };
+            return lastMessage?.role === 'assistant'
+              ? [...prev.slice(0, -1), newMessage]
+              : [...prev, newMessage];
+          });
+        }
+      };
+
+      messageHandlerRef.current = messageHandler;
+      socketRef.current.addEventListener('message', messageHandler);
+    } catch (error) {
+      console.error('WebSocket error:', error);
+      setIsLoading(false);
+    }
   }
-}
 
   return (
-    <div className="flex flex-col min-w-0 h-dvh bg-background">
-      <Header/>
+    <div className='flex flex-col min-w-0 h-dvh bg-background'>
+      <Header />
       {connectionError && (
-        <div className="mx-auto px-4 py-2 bg-red-100 border border-red-400 text-red-700 rounded-md max-w-3xl">
-          <p className="text-sm">{connectionError}</p>
-          <p className="text-xs mt-1">
-            For local development, make sure to start the backend server: <code>cd resume_backend && python main.py</code>
+        <div className='mx-auto px-4 py-2 bg-red-100 border border-red-400 text-red-700 rounded-md max-w-3xl'>
+          <p className='text-sm'>{connectionError}</p>
+          <p className='text-xs mt-1'>
+            For local development, make sure to start the backend server:{' '}
+            <code>cd resume_backend && python main.py</code>
           </p>
         </div>
       )}
-      <div className="flex flex-col min-w-0 gap-6 flex-1 overflow-y-scroll pt-4" ref={messagesContainerRef}>
+      <div
+        className='flex flex-col min-w-0 gap-6 flex-1 overflow-y-scroll pt-4'
+        ref={messagesContainerRef}
+      >
         {messages.length == 0 && <Overview />}
         {messages.map((message, index) => (
           <PreviewMessage key={index} message={message} />
         ))}
         {isLoading && <ThinkingMessage />}
-        <div ref={messagesEndRef} className="shrink-0 min-w-[24px] min-h-[24px]"/>
+        <div
+          ref={messagesEndRef}
+          className='shrink-0 min-w-[24px] min-h-[24px]'
+        />
       </div>
-      <div className="flex mx-auto px-4 bg-background pb-4 md:pb-6 gap-2 w-full md:max-w-3xl">
-        <ChatInput  
+      <div className='flex mx-auto px-4 bg-background pb-4 md:pb-6 gap-2 w-full md:max-w-3xl'>
+        <ChatInput
           question={question}
           setQuestion={setQuestion}
           onSubmit={handleSubmit}
@@ -172,4 +210,4 @@ async function handleSubmit(text?: string) {
       </div>
     </div>
   );
-};
+}

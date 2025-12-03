@@ -14,6 +14,10 @@ load_dotenv(dotenv_path="../.env")
 API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 PORT = int(os.getenv("PORT", 8765))
+LLM_CALL_NAME = {
+    "GPT-4": "openai/gpt-4",
+    "Claude Sonnet 4.5": "anthropic/claude-sonnet-4.5"
+}
 
 # Validate API key
 if not API_KEY:
@@ -47,7 +51,7 @@ except Exception as e:
 # Store conversation history for each client
 client_conversations = {}
 
-async def get_ai_response(user_message, conversation_history):
+async def get_ai_response(user_message, llm_version, conversation_history):
     """Get AI response from OpenRouter API"""
     try:
         # Build the messages array with system message and conversation history
@@ -73,7 +77,7 @@ Responses should be concise, conversational, and professional. Although you have
         messages.append({"role": "user", "content": user_message})
         
         data = {
-            "model": "openai/gpt-4",
+            "model": LLM_CALL_NAME[llm_version],
             "messages": messages,
             "max_tokens": 1000,
             "temperature": 0.7
@@ -113,6 +117,7 @@ async def handle_chat_message(websocket, message, client_id):
     try:
         data = json.loads(message)
         user_message = data.get("message", "").strip()
+        selected_model = data.get("model", "GPT-4")  # Default to GPT-4 if not specified
         
         if not user_message:
             await websocket.send(json.dumps({
@@ -120,6 +125,11 @@ async def handle_chat_message(websocket, message, client_id):
                 "message": "Empty message received"
             }))
             return
+        
+        # Validate model selection
+        if selected_model not in LLM_CALL_NAME:
+            print(f"Invalid model selected: {selected_model}, defaulting to GPT-4")
+            selected_model = "GPT-4"
         
         # Initialize conversation history for new clients
         if client_id not in client_conversations:
@@ -131,8 +141,9 @@ async def handle_chat_message(websocket, message, client_id):
             "content": user_message
         })
         
-        # Get AI response
-        ai_response = await get_ai_response(user_message, client_conversations[client_id])
+        # Get AI response with selected model
+        print(f"Using model: {selected_model} ({LLM_CALL_NAME[selected_model]})")
+        ai_response = await get_ai_response(user_message, selected_model, client_conversations[client_id])
         
         # Add AI response to conversation history
         client_conversations[client_id].append({
