@@ -1,15 +1,14 @@
-# Chatbot UI
+# pauLLM
 
-A lightweight and modern chat interface for LLM interactions with Markdown support!
-
-👉 Looking for a version with web search integration?   
-Check out the [`websearch_template`](https://github.com/ChristophHandschuh/chatbot-ui/tree/websearch_template) branch, which includes contributions from [CameliaK](https://github.com/CameliaK)
+A resume-based chatbot based off the professional experience of Paul Flanagan!
 
 WebSocket connection refactured by [GBG7](https://github.com/GBG7)
 
 ## Overview
 
-A minimalist chat interface built with React and TypeScript, designed to be easily integrated with any LLM backend. Features a clean and modern design.
+A minimalist chat interface whose LLM is trained off of Paul Flanagan's resume.
+The frontend is built with React and TypeScript, using OpenRouter as an LLM backend to connect both ChatGPT 4.0 and Claude 4.5 as engine services.
+Features a clean and modern design.
 
 ![Demo](demo/image.png)
 
@@ -47,7 +46,8 @@ pip install websockets
 ```
 4. Run the test backend:
 ```bash
-python test.py
+cd resume_backend
+python main.py
 ```
 
 ## Credits
@@ -55,6 +55,7 @@ python test.py
 This project was built by:
 - [Leon Binder](https://github.com/LeonBinder)
 - [Christoph Handschuh](https://github.com/ChristophHandschuh)
+- [Paul Flanagan] (https://github.com/pauljflanagan)
 
 Additional contribution by:
 - [CameliaK](https://github.com/CameliaK) – Implemented web search and integrated it into the LLM prompt
